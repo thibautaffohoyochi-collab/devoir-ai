@@ -1,0 +1,74 @@
+{
+  "name": "DevoirAI — Notification Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "devoir-termine",
+        "responseMode": "onReceived"
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook DevoirAI",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.event}}",
+              "operation": "equals",
+              "value2": "devoir_termine"
+            }
+          ]
+        }
+      },
+      "id": "filter-termine",
+      "name": "Filtre: terminé",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "VOTRE_CHAT_ID",
+        "text": "=✅ *Devoir terminé !*\n\n👤 Étudiant : {{$json.user.username}}\n📄 Titre : {{$json.titre}}\n📚 Matière : {{$json.matiere}}\n📁 Format : {{$json.format_sortie | upcase}}\n\n[🔗 Voir le devoir]({{$json.view_url}})",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-msg",
+      "name": "Message Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [680, 220]
+    },
+    {
+      "parameters": {
+        "chatId": "VOTRE_CHAT_ID",
+        "text": "=❌ *Erreur devoir*\n\n👤 {{$json.user.username}}\n📄 {{$json.titre}}\n⚠️ {{$json.erreur}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-error",
+      "name": "Telegram Erreur",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [680, 400]
+    }
+  ],
+  "connections": {
+    "Webhook DevoirAI": {
+      "main": [[{ "node": "Filtre: terminé", "type": "main", "index": 0 }]]
+    },
+    "Filtre: terminé": {
+      "main": [
+        [{ "node": "Message Telegram", "type": "main", "index": 0 }],
+        [{ "node": "Telegram Erreur", "type": "main", "index": 0 }]
+      ]
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "name": "DevoirAI — Notification Email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "devoir-termine",
+        "responseMode": "onReceived",
+        "responseData": "allEntries"
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook DevoirAI",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.event}}",
+              "operation": "equals",
+              "value2": "devoir_termine"
+            }
+          ]
+        }
+      },
+      "id": "filter-termine",
+      "name": "Filtre: devoir terminé",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@devoirai.app",
+        "toEmail": "={{$json.user.email}}",
+        "subject": "✅ Ton devoir est prêt — {{$json.titre}}",
+        "emailType": "html",
+        "message": "<!DOCTYPE html><html><body style='font-family:Inter,sans-serif;background:#0f0f23;color:#e2e8f0;padding:40px;'><div style='max-width:600px;margin:0 auto;background:#1a1a2e;border-radius:16px;padding:32px;border:1px solid rgba(255,255,255,0.1)'><div style='text-align:center;margin-bottom:24px'><h1 style='color:#4f46e5;margin:0'>🎓 DevoirAI</h1></div><h2 style='color:#fff'>Bonjour {{$json.user.username}} !</h2><p style='color:#94a3b8'>Ton devoir a été traité avec succès par l'IA.</p><div style='background:rgba(79,70,229,0.1);border:1px solid rgba(79,70,229,0.3);border-radius:12px;padding:20px;margin:24px 0'><p style='margin:0;color:#a5b4fc'><strong>📄 Devoir :</strong> {{$json.titre}}</p><p style='margin:8px 0 0;color:#a5b4fc'><strong>📚 Matière :</strong> {{$json.matiere}}</p><p style='margin:8px 0 0;color:#a5b4fc'><strong>📁 Format :</strong> {{$json.format_sortie | upcase}}</p></div><div style='text-align:center'><a href='{{$json.view_url}}' style='display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:600;margin:8px'>Voir le devoir</a><a href='{{$json.download_url}}' style='display:inline-block;background:rgba(79,70,229,0.2);color:#a5b4fc;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:600;margin:8px;border:1px solid rgba(79,70,229,0.4)'>Télécharger</a></div><p style='color:#475569;font-size:12px;text-align:center;margin-top:24px'>DevoirAI — Ton assistant étudiant IA</p></div></body></html>"
+      },
+      "id": "send-email",
+      "name": "Envoyer Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [680, 220]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@devoirai.app",
+        "toEmail": "={{$json.user.email}}",
+        "subject": "❌ Erreur sur ton devoir — {{$json.titre}}",
+        "emailType": "html",
+        "message": "<h2>Bonjour {{$json.user.username}},</h2><p>Une erreur est survenue lors du traitement de ton devoir <strong>{{$json.titre}}</strong>.</p><p>Détail : {{$json.erreur}}</p><p>Réessaie depuis <a href='http://localhost:5174'>DevoirAI</a>.</p>"
+      },
+      "id": "send-email-error",
+      "name": "Email Erreur",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [680, 400]
+    }
+  ],
+  "connections": {
+    "Webhook DevoirAI": {
+      "main": [[{ "node": "Filtre: devoir terminé", "type": "main", "index": 0 }]]
+    },
+    "Filtre: devoir terminé": {
+      "main": [
+        [{ "node": "Envoyer Email", "type": "main", "index": 0 }],
+        [{ "node": "Email Erreur", "type": "main", "index": 0 }]
+      ]
+    }
+  }
+}

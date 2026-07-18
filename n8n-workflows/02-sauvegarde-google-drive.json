@@ -1,0 +1,76 @@
+{
+  "name": "DevoirAI — Sauvegarde Google Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "devoir-termine",
+        "responseMode": "onReceived"
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook DevoirAI",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.event}}",
+              "operation": "equals",
+              "value2": "devoir_termine"
+            }
+          ]
+        }
+      },
+      "id": "filter-termine",
+      "name": "Filtre: terminé",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$json.download_url}}",
+        "options": {}
+      },
+      "id": "download-file",
+      "name": "Télécharger le fichier",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 220]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "name": "={{$node['Webhook DevoirAI'].json.titre}}.{{$node['Webhook DevoirAI'].json.format_sortie}}",
+        "driveId": { "__rl": true, "mode": "list", "value": "My Drive" },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "DevoirAI"
+        },
+        "options": {}
+      },
+      "id": "save-drive",
+      "name": "Sauvegarder sur Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [900, 220]
+    }
+  ],
+  "connections": {
+    "Webhook DevoirAI": {
+      "main": [[{ "node": "Filtre: terminé", "type": "main", "index": 0 }]]
+    },
+    "Filtre: terminé": {
+      "main": [[{ "node": "Télécharger le fichier", "type": "main", "index": 0 }]]
+    },
+    "Télécharger le fichier": {
+      "main": [[{ "node": "Sauvegarder sur Drive", "type": "main", "index": 0 }]]
+    }
+  }
+}
