@@ -16,7 +16,8 @@ bearer_scheme = HTTPBearer()
 
 
 def hash_password(password: str) -> str:
-    salt = bcrypt.gensalt()
+    # rounds=10 est le défaut — on garde 10 pour la sécurité
+    salt = bcrypt.gensalt(rounds=10)
     hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
     return hashed.decode("utf-8")
 

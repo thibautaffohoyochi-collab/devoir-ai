@@ -33,13 +33,14 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     await db.commit()
     await db.refresh(user)
 
-    # Notifier n8n du nouvel utilisateur
-    from app.services.webhooks import notify_nouvel_utilisateur
-    await notify_nouvel_utilisateur(user.username, user.email)
-
-    # Email de bienvenue
+    # Email de bienvenue — en tâche de fond pour ne pas bloquer la réponse
+    import asyncio
     from app.services.email import send_welcome
-    await send_welcome(user.email, user.username)
+    asyncio.create_task(send_welcome(user.email, user.username))
+
+    # Webhook n8n — aussi en tâche de fond
+    from app.services.webhooks import notify_nouvel_utilisateur
+    asyncio.create_task(notify_nouvel_utilisateur(user.username, user.email))
 
     return user
 
