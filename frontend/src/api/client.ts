@@ -2,10 +2,12 @@ import axios from 'axios'
 import { useAuthStore } from '../store/authStore'
 
 // En dev → proxy Vite vers localhost:8000
-// En prod → VITE_API_URL pointe vers Render backend
+// En prod → backend Render
 const BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
-  : '/api'
+  : import.meta.env.PROD
+    ? 'https://devoir-ai-backend.onrender.com/api'
+    : '/api'
 
 const api = axios.create({
   baseURL: BASE_URL,
