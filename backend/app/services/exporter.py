@@ -63,12 +63,14 @@ def _make_pdf_styles():
     styles = getSampleStyleSheet()
     return {
         'title': ParagraphStyle(
-            'Title', fontSize=24, fontName='Helvetica-Bold',
-            textColor=PRIMARY, spaceAfter=6, alignment=TA_CENTER
+            'Title', fontSize=18, fontName='Helvetica-Bold',
+            textColor=PRIMARY, spaceAfter=8, alignment=TA_CENTER,
+            leading=22, wordWrap='CJK'
         ),
         'subtitle': ParagraphStyle(
-            'Subtitle', fontSize=12, fontName='Helvetica',
-            textColor=MUTED, spaceAfter=20, alignment=TA_CENTER
+            'Subtitle', fontSize=10, fontName='Helvetica',
+            textColor=MUTED, spaceAfter=16, alignment=TA_CENTER,
+            leading=14
         ),
         'h1': ParagraphStyle(
             'H1', fontSize=14, fontName='Helvetica-Bold',
@@ -110,13 +112,15 @@ def _export_pdf(text: str, path: str, titre: str):
     styles = _make_pdf_styles()
     story = []
 
-    # En-tête
-    story.append(Spacer(1, 1*cm))
+    # En-tête — titre sur sa propre ligne, date en dessous
+    story.append(Spacer(1, 0.5*cm))
     story.append(Paragraph(titre, styles['title']))
+    story.append(Spacer(1, 0.3*cm))
     story.append(Paragraph(
         f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}",
         styles['subtitle']
     ))
+    story.append(Spacer(1, 0.3*cm))
     story.append(HRFlowable(width="100%", thickness=2, color=PRIMARY, spaceAfter=20))
 
     # Contenu
