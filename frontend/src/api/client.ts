@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useAuthStore } from '../store/authStore'
 
 // En dev → proxy Vite vers localhost:8000
-// En prod → VITE_API_URL pointe vers Railway backend
+// En prod → VITE_API_URL pointe vers Render backend
 const BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : '/api'
