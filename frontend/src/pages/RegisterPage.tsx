@@ -20,7 +20,12 @@ export default function RegisterPage() {
       toast.success('Compte créé ! Connecte-toi.')
       navigate('/login')
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Inscription échouée')
+      const msg = err.response?.data?.detail || err.message || 'Inscription échouée'
+      if (err.code === 'ECONNABORTED' || msg.includes('timeout') || !err.response) {
+        toast.error('Le serveur démarre... Réessaie dans 30 secondes.')
+      } else {
+        toast.error(msg)
+      }
     } finally { setLoading(false) }
   }
 
